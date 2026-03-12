@@ -26,7 +26,6 @@ const clerkWebhooks = async(req,res) =>{
             email:data.email_addresses?.[0]?.email_address || "noemail@clerk.com",
             username:data.first_name + " " + data.last_name,
             image:data.image_url,
-            recentSearchedCities:"",
         }
         console.log(userData);
         
