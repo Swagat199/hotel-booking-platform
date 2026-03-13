@@ -22,8 +22,8 @@ app.use(express.json());
 app.use(clerkMiddleware());
 
 //clerkWebhooks();
-//app.use("/api/clerk",clerkWebhooks);
-app.use("/api/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
+app.use("/api/clerk",clerkWebhooks);
+//app.use("/api/clerk", express.raw({ type: "application/json" }), clerkWebhooks);
 
 app.get('/',(req,res)=>res.send("API is working fine!"));
 
