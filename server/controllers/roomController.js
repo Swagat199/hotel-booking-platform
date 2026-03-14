@@ -5,13 +5,14 @@ import { v2 as cloudinary } from "cloudinary";
 export const createRoom = async (req,res)=>{
     try {
         const {roomType,pricePerNight,amenities} = req.body;
-        const hotel = await Hotel.findOne({owner:req.auth.userId});
+        const hotel = await Hotel.findOne({owner:req.auth().userId});
 
         if(!hotel) return res.json({success:false,message:"No Hotel found"});
 
         //upload images to cloudinary
         const uploadImages = req.files.map(async(file)=>{
             const response = await cloudinary.uploader.upload(file.path);
+            console.log(response);
             return response.secure_url;
         })
 
@@ -21,7 +22,7 @@ export const createRoom = async (req,res)=>{
         await Room.create({
             hotel:hotel._id,
             roomType,
-            pricerPerNight: +pricePerNight,
+            pricePerNight: +pricePerNight,
             amenities:JSON.parse(amenities),
             images,
         })
@@ -50,7 +51,7 @@ export const getRooms = async (req,res)=>{
 // API to get all rooms for a specific hotel
 export const getOwnerRooms = async (req,res)=>{
     try {
-        const hotelData = await Hotel({owner:req.auth.userId})
+        const hotelData = await Hotel({owner:req.auth().userId})
         const rooms = await Room.find({hotel:hotelData._id.toString()}).populate("hotel");
         res.json({success:true,rooms});
     } catch (error) {
