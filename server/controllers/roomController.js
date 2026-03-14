@@ -1,7 +1,8 @@
 import Hotel from "../models/Hotel.js";
 import Room from "../models/Room.js";
 import { v2 as cloudinary } from "cloudinary";
-import path from "path";
+
+
 // API to create a new room for a hotel
 export const createRoom = async (req,res)=>{
     try {
@@ -13,30 +14,19 @@ export const createRoom = async (req,res)=>{
         if(!hotel) return res.json({success:false,message:"No Hotel found"});
 
         //upload images to cloudinary
-        console.log("FILES RECEIVED:", req.files);
+        //console.log("FILES RECEIVED:", req.files);
         
-        /*const uploadImages = req.files.map(async(file)=>{
-            const response = await cloudinary.uploader.upload(file.path,{
-            folder: "hotel_rooms",
-            resource_type: "image",
-            });
-            console.log(response);
+        const uploadImages = req.files.map(async(file)=>{
+            const response = await cloudinary.uploader.upload(file.path);
+            //console.log(response);
             return response.secure_url;
-        })*/
+        })
 
-        const uploadImages = req.files.map(async (file) => {
-        const filePath = path.resolve(file.path); // normalize path
+       
 
-        const result = await cloudinary.uploader
-                .upload(filePath, {
-                    folder: "hotel_rooms",
-                    resource_type: "image"
-                });
-            return result.secure_url;
-        });   
 
         // Wait for all uploads to complete 
-        const images = await Promise.all(uploadImages)
+        const images = await Promise.all(uploadImages);
 
         await Room.create({
             hotel:hotel._id,
@@ -47,7 +37,7 @@ export const createRoom = async (req,res)=>{
         })
         res.json({success:true,message:"Room Created Sucessfully"});
     } catch (error) {
-        console.log("UPLOAD ERROR:", error);
+        //console.log("UPLOAD ERROR:", error);
         res.json({success:false,message:error.message});
     }
 }

@@ -10,6 +10,7 @@ import hotelRouter from "./routes/hotelRoutes.js";
 import connectCloudinary from "./configs/cloudinary.js";
 import roomRouter from "./routes/roomRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
+import { v2 as cloudinary } from "cloudinary";
 
 connectDB();
 connectCloudinary();
@@ -33,7 +34,18 @@ app.use("/api/rooms",roomRouter);
 app.use("/api/bookings",bookingRouter);
 
 
-app.get('/health',(req,res)=>res.send("API is w fine!"))
+app.get('/health',(req,res)=>res.send("API is w fine!"));
+app.get("/cloud-test", async (req,res)=>{
+  try{
+    const result = await cloudinary.uploader.upload(
+      "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+    );
+    res.json(result);
+  }catch(err){
+    console.log(err);
+    res.json(err);
+  }
+});
 
 const PORT = 5000;
 app.listen(PORT,()=>console.log(`server running on port ${PORT}`));
