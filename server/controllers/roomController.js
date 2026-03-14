@@ -13,14 +13,26 @@ export const createRoom = async (req,res)=>{
 
         //upload images to cloudinary
         console.log("FILES RECEIVED:", req.files);
-        const uploadImages = req.files.map(async(file)=>{
+        
+        /*const uploadImages = req.files.map(async(file)=>{
             const response = await cloudinary.uploader.upload(file.path,{
             folder: "hotel_rooms",
             resource_type: "image",
             });
             console.log(response);
             return response.secure_url;
-        })
+        })*/
+
+        const uploadImages = req.files.map((file) => {
+        const filePath = path.resolve(file.path); // normalize path
+
+        return cloudinary.uploader
+            .upload(filePath, {
+            folder: "hotel_rooms",
+            resource_type: "image"
+         })
+        .then((result) => result.secure_url);
+        });   
 
         // Wait for all uploads to complete 
         const images = await Promise.all(uploadImages)
@@ -34,6 +46,7 @@ export const createRoom = async (req,res)=>{
         })
         res.json({success:true,message:"Room Created Sucessfully"});
     } catch (error) {
+        console.log("UPLOAD ERROR:", error);
         res.json({success:false,message:error.message});
     }
 }
@@ -50,7 +63,7 @@ export const getRooms = async (req,res)=>{
         }).sort({createdAt:-1})
         res.json({success:true,rooms});
     } catch (error) {
-        console.log("UPLOAD ERROR:", error);
+        
         res.json({success:false,message:error.message});
     }
 }
