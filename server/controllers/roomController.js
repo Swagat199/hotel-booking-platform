@@ -5,11 +5,14 @@ import { v2 as cloudinary } from "cloudinary";
 export const createRoom = async (req,res)=>{
     try {
         const {roomType,pricePerNight,amenities} = req.body;
+        console.log("BODY:", req.body);
+        
         const hotel = await Hotel.findOne({owner:req.auth().userId});
 
         if(!hotel) return res.json({success:false,message:"No Hotel found"});
 
         //upload images to cloudinary
+        console.log("FILES RECEIVED:", req.files);
         const uploadImages = req.files.map(async(file)=>{
             const response = await cloudinary.uploader.upload(file.path,{
             folder: "hotel_rooms",
@@ -47,6 +50,7 @@ export const getRooms = async (req,res)=>{
         }).sort({createdAt:-1})
         res.json({success:true,rooms});
     } catch (error) {
+        console.log("UPLOAD ERROR:", error);
         res.json({success:false,message:error.message});
     }
 }
