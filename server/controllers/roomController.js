@@ -24,15 +24,15 @@ export const createRoom = async (req,res)=>{
             return response.secure_url;
         })*/
 
-        const uploadImages = req.files.map((file) => {
+        const uploadImages = req.files.map(async (file) => {
         const filePath = path.resolve(file.path); // normalize path
 
-        return cloudinary.uploader
-            .upload(filePath, {
-            folder: "hotel_rooms",
-            resource_type: "image"
-         })
-        .then((result) => result.secure_url);
+        const result = await cloudinary.uploader
+                .upload(filePath, {
+                    folder: "hotel_rooms",
+                    resource_type: "image"
+                });
+            return result.secure_url;
         });   
 
         // Wait for all uploads to complete 
