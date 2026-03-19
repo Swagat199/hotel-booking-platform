@@ -1,6 +1,8 @@
+import transporter from "../configs/nodemailer.js";
 import Booking from "../models/Booking.js";
 import Hotel from "../models/Hotel.js";
 import Room from "../models/Room.js";
+
 
 //Function to Check Availbility of Room
 const checkAvailbility = async ({ checkInDate,checkOutDate,room})=>{
@@ -68,6 +70,98 @@ export const createBooking = async (req,res)=>{
             totalPrice,
         });
 
+        const mailOptions = {
+            // from:process.env.SENDER_EMAIL,
+            // to:req.user.email,
+            // subject:'Hotel Booking  Details',
+            // html:
+            //     `<h2>Your Booking Details</h2>
+            //      <p>Dear ${req.user.username},</p>
+            //      <p>Thank you for your booking! Here are your details:</p>
+            //      <ul>
+            //         <li><strong>Booking ID:</strong> ${booking._id}</li>
+            //         <li><strong>Hotel Name:</strong> ${roomData.hotel.name}</li>
+            //         <li><strong>Location:</strong> ${roomData.hotel.address}</li>
+            //         <li><strong>Date:</strong> ${booking.checkInDate.toDateString()}</li>
+            //         <li><strong>Booking Amount:</strong> ${process.env.CURRENCY || '₹'} ${booking.totalPrice}/night</li>
+            //      </ul>
+            //      <p>We look forward to welcoming you!</p>
+            //      <p>If you need to make any changes, feel free to cntact us. </p>
+            //     `
+            from: process.env.SENDER_EMAIL,
+            to: req.user.email,
+            subject: "🎉 Booking Confirmed | Your Stay is Ready!",
+            html: `
+                <div style="font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f8; padding: 20px; font-size: 16px; line-height: 1.6;">
+  
+                    <div style="max-width: 600px; margin: auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.1);">
+
+                    <!-- Header -->
+                    <div style="background: #0f172a; padding: 20px; text-align: center;">
+                    <img src="https://ezgif.com/save/ezgif-72de56f57010d5b3.png" alt="Logo" style="height: 50px;" />
+                    </div>
+
+                    <!-- Animated Banner (GIF) -->
+                    <div style="text-align: center;">
+                    <img src="https://media.giphy.com/media/OkJat1YNdoD3W/giphy.gif" 
+                    alt="Booking Confirmed" 
+                    style="width: 100%; max-height: 200px; object-fit: cover;" />
+                </div>
+
+             <!-- Hero -->
+            <div style="padding: 20px; text-align: center;">
+                <h2 style="color: #38bdf8;">🎉 Booking Confirmed!</h2>
+                <p style="color: #555;">Your perfect stay is waiting for you ✨</p>
+            </div>
+
+             <!-- Content -->
+            <div style="padding: 20px; color: #333;">
+            <h3>Hello ${req.user.username}, 👋</h3>
+      
+            <p>We’re excited to host you! Here are your booking details:</p>
+
+            <!-- Details -->
+            <div style="background: #f1f5f9; border-radius: 10px; padding: 15px;">
+            <p><strong>🆔 Booking ID:</strong> ${booking._id}</p>
+            <p><strong>🏨 Hotel:</strong> ${roomData.hotel.name}</p>
+            <p><strong>📍 Location:</strong> ${roomData.hotel.address}</p>
+            <p><strong>📅 Date:</strong> ${booking.checkInDate.toDateString()}</p>
+            <p><strong>💰 Amount:</strong> ${process.env.CURRENCY || '₹'} ${booking.totalPrice} / night</p>
+            </div>
+
+        <!-- Animated Button -->
+      <div style="text-align: center; margin: 25px 0;">
+        <a href="http://localhost:5173/my-bookings" 
+           style="
+             display: inline-block;
+             background: linear-gradient(135deg, #4facfe, #00f2fe);
+             color: white;
+             padding: 14px 22px;
+             border-radius: 8px;
+             text-decoration: none;
+             font-weight: bold;
+             transition: all 0.3s ease;
+           ">
+           🚀 View Booking
+        </a>
+      </div>
+
+      <p style="text-align:center;">✨ We can’t wait to welcome you!</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="background: #0f172a; text-align: center; padding: 15px; color: #94a3b8;">
+      <p>© 2026 QuickStay</p>
+    </div>
+
+  </div>
+</div>
+`
+        }
+
+        await transporter.sendMail(mailOptions);
+        
+
         res.json({success:true,message:"Booking created successfully"});
 
     } catch (error) {
@@ -91,7 +185,7 @@ export const getUserBookings = async (req,res)=>{
  
 export const getHotelBookings = async (req,res)=>{
     try {
-        const hotel = await Hotel.findOne({owner:req.auth.userId});
+        const hotel = await Hotel.findOne({owner:req.auth().userId});
 
         if(!hotel){
             return res.json({success:false,message:"No Hotel found"});

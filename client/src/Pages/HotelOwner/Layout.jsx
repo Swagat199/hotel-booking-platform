@@ -2,8 +2,12 @@ import React from 'react'
 import Navbar from '../../Components/HotelOwner/navbar'
 import Sidebar from '../../Components/HotelOwner/Sidebar'
 import { Outlet } from 'react-router-dom'
+import {useAppContext} from '../../Context/AppContext'
 
 function Layout() {
+  
+  const {isOwner,navigate} = useAppContext();
+
   return (
     <div className='flex flex-col h-screen'>
         <Navbar/>

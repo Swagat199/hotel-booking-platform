@@ -6,9 +6,9 @@ export const protect = async (req,res,next)=>{
     /*console.log("HEADERS:", req.headers.authorization);
     console.log("AUTH:", req.auth());
     console.log(userId,"authMiddleware");*/
-
     
     const { userId } = req.auth();
+    //console.log(userId);
     if(!userId){
       console.log("User not authenticated");
       return res.json({

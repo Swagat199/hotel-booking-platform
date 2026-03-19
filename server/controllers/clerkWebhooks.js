@@ -30,21 +30,34 @@ const clerkWebhooks = async(req,res) =>{
 
         const { data, type } = evt;
         
-        const userData = {
-            _id:data.id,
-            email: data.email_addresses?.[0]?.email_address || "",
-            username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
-            image: data.image_url || "",
-        }
-        console.log(userData);
+        // const userData = {
+        //     _id:data.id,
+        //     email: data.email_addresses?.[0]?.email_address || "",
+        //     username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+        //     image: data.image_url || "",
+        // }
+        // console.log(userData);
         
         //Switch Cases for different Events
         switch (type){
             case "user.created":{
-                await User.create(userData);
+                const userData = {
+                    _id:data.id,
+                    email: data.email_addresses?.[0]?.email_address || "",
+                    username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+                    image: data.image_url || "",
+                }
+                console.log(userData);
+                await User.create(userData); 
                 break;
             }
             case "user.updated":{
+                const userData = {
+                    _id:data.id,
+                    email: data.email_addresses?.[0]?.email_address || "",
+                    username: `${data.first_name || ""} ${data.last_name || ""}`.trim(),
+                    image: data.image_url || "",
+                }
                 await User.findByIdAndUpdate(data.id,userData);
                 break;
             }
