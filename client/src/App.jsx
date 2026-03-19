@@ -10,7 +10,7 @@ import HotelReg from './Components/HotelReg';
 import Layout from './Pages/HotelOwner/Layout';
 import Dashboard from './Pages/HotelOwner/Dashboard';
 import AddRooms from './Pages/HotelOwner/AddRooms';
-import Listrooms from './Pages/HotelOwner/Listrooms';
+import Listrooms from './Pages/HotelOwner/ListRooms';
 import {Toaster} from 'react-hot-toast';
 import { useAppContext } from './Context/AppContext';
 
