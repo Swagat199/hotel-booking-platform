@@ -207,20 +207,20 @@ export const getHotelBookings = async (req,res)=>{
 export const stripePayment = async (req,res)=>{
         try {
             const {bookingId} = req.body;
-            //console.log("1",bookingId);
+            console.log("1",bookingId);
             
             const booking = await Booking.findById(bookingId);
-            //console.log("2",booking);
+            console.log("2",booking);
             const roomData = await Room.findById(booking.room).populate('hotel');
-            //console.log("3",roomData);
+            console.log("3",roomData);
             const totalPrice = booking.totalPrice;
-            //console.log("4",totalPrice);
+            console.log("4",totalPrice);
             const {origin} = req.headers;
-            //console.log("5",origin);
+            console.log("5",origin);
             
             const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
 
-            //console.log("6",stripeInstance);
+            console.log("6",stripeInstance);
             
             const line_items = [
                 {
@@ -244,7 +244,7 @@ export const stripePayment = async (req,res)=>{
                     bookingId,
                 }
             })
-            //console.log("7",session);
+            console.log("7",session);
             
             res.json({success:true,url:session.url});
             

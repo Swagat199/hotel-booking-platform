@@ -1,46 +1,51 @@
 import stripe from "stripe";
 import Booking from "../models/Booking.js";
 
-// API to handle Stripe Webhook
-export const stripeWebhooks = async (req,res)=>{
-    // stripe gateway initialize
-        console.log("🔥 Webhook hit");
+export const stripeWebhooks = async (req, res) => {
 
-if (event.type === "checkout.session.completed") {
-    console.log("🎉 SUCCESS EVENT");
-}
-        const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
-        const sig = req.headers['stripe-signature'];
-        let event;
+    console.log("🔥 Webhook hit");
 
-    try {  
-        event=stripeInstance.webhooks.constructEvent(req.body,sig,
-            process.env.STRIPE_WEBHOOK_SECRET);
-    }catch(error){
-        res.status(400).send(`Webhook Error: ${error.message}`)
-    } 
+    const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
+    const sig = req.headers['stripe-signature'];
 
-    // Handle the event
-    if(event.type === 'checkout.session.completed'){
-        // const paymentIntent = event.data.object;
-        // const paymentIntentId = paymentIntent.id;
+    let event;
 
-        // // Getting Session Metadata
-        // const session = await stripeInstance.checkout.sessions.list({
-        //     payment_intent:paymentIntentId,
-        // }); 
+    try {
+        event = stripeInstance.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+        console.log("RAW BODY TYPE:", typeof req.body);
+        console.log("HEADERS:", req.headers);
+        console.log("✅ Signature verified");
+        console.log("👉 Event type:", event.type);
 
-        // const {bookingId} = session.data[0].metadata;
+    } catch (error) {
+        console.log("❌ Webhook Error:", error.message);
+        return res.status(400).send(`Webhook Error: ${error.message}`);
+    }
+
+    // ✅ NOW use event
+    if (event.type === "checkout.session.completed") {
+
+        console.log("🎉 SUCCESS EVENT");
+
         const session = event.data.object;
-
         const bookingId = session.metadata.bookingId;
 
         console.log("✅ Payment success for booking:", bookingId);
-        // Mark Payment as Paid
-        await Booking.findByIdAndUpdate(bookingId,{isPaid:true,paymentMethod:"Stripe"});
-         
-    }else{
-        console.log("Unhandled event type :",event.type);
+
+        await Booking.findByIdAndUpdate(bookingId, {
+            isPaid: true,
+            paymentMethod: "Stripe",
+            status: "confirmed"
+        });
+
+        console.log("✅ DB UPDATED");
+    } else {
+        console.log("Unhandled event type:", event.type);
     }
-    res.json({ received:true});
-}
+
+    res.json({ received: true });
+};
