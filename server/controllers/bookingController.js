@@ -2,7 +2,7 @@ import transporter from "../configs/nodemailer.js";
 import Booking from "../models/Booking.js";
 import Hotel from "../models/Hotel.js";
 import Room from "../models/Room.js";
-
+import stripe from "stripe";
 
 //Function to Check Availbility of Room
 const checkAvailbility = async ({ checkInDate,checkOutDate,room})=>{
@@ -203,3 +203,53 @@ export const getHotelBookings = async (req,res)=>{
          res.json({success:false,message:"Failed to fetch bookings"});
     }
 }
+
+export const stripePayment = async (req,res)=>{
+        try {
+            const {bookingId} = req.body;
+            //console.log("1",bookingId);
+            
+            const booking = await Booking.findById(bookingId);
+            //console.log("2",booking);
+            const roomData = await Room.findById(booking.room).populate('hotel');
+            //console.log("3",roomData);
+            const totalPrice = booking.totalPrice;
+            //console.log("4",totalPrice);
+            const {origin} = req.headers;
+            //console.log("5",origin);
+            
+            const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
+
+            //console.log("6",stripeInstance);
+            
+            const line_items = [
+                {
+                    price_data:{
+                        currency:'usd',
+                        product_data:{
+                            name:roomData.hotel.name,
+                        },// Convert totalPrice to cents
+                        unit_amount:totalPrice * 100
+                    },
+                    quantity:1,
+                }
+            ]
+
+            const session = await stripeInstance.checkout.sessions.create({
+                line_items,
+                mode:'payment',
+                success_url:`${origin}/loader/my-bookings`,
+                cancel_url:`${origin}/my-bookings`,
+                metadata:{
+                    bookingId,
+                }
+            })
+            //console.log("7",session);
+            
+            res.json({success:true,url:session.url});
+            
+        } catch (error) {
+            res.json({success:false,message:"Payment Failed"});
+        }
+}
+
